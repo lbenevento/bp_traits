@@ -34,6 +34,7 @@ enum class Mutation {
     MOJAVE,
     MYSTIC,
     ORANGE_BELLY,
+    ORANGE_DREAM,
     PASTEL,
     PHANTOM,
     RUSSO,

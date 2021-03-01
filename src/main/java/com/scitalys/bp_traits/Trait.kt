@@ -214,6 +214,13 @@ enum class Trait(
         firstAppearance = null,
         formattedString = "Graphite Ivory"
     ),
+    SUPER_ORANGE_DREAM(
+        geneLG1 = Mutation.ORANGE_DREAM,
+        geneLG2 = Mutation.ORANGE_DREAM,
+        geneType = GeneType.COALLELIC,
+        firstAppearance = 2011,
+        formattedString = "Super OD"
+    ),
     SUPER_PASTEL(
         geneLG1 = Mutation.PASTEL,
         geneLG2 = Mutation.PASTEL,
@@ -462,6 +469,12 @@ enum class Trait(
         geneType = GeneType.CODOMINANT,
         firstAppearance = null,
         formattedString = "Orange Belly"
+    ),
+    ORANGE_DREAM(
+        geneLG1 = Mutation.ORANGE_DREAM,
+        geneType = GeneType.CODOMINANT,
+        firstAppearance = 2004,
+        formattedString = "Orange Dream"
     ),
     PHANTOM(
         geneLG1 = Mutation.PHANTOM,
