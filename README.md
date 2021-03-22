@@ -1,4 +1,4 @@
-# Python regius genetic for Android
+# Python regius genetics for Android
 
 This is a library you can use if you are developing an app that requires Python regius (ball python) genetic related functions.
 
@@ -15,6 +15,7 @@ allprojects {
   }
 }
 ```
+
 In your module build.gradle:
 ```
 dependencies {
