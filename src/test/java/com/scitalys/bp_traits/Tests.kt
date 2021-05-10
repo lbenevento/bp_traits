@@ -9,7 +9,7 @@ import org.junit.Assert.*
  *
  * See [testing documentation](http://d.android.com/tools/testing).
  */
-class ExampleUnitTest {
+class Tests {
     @Test
     fun findByHetTest() {
         assertEquals(
@@ -39,6 +39,30 @@ class ExampleUnitTest {
         assertNotEquals(
             Trait.HET_PIED,
             Trait.fromValue(Mutation.HET_PIED, null)
+        )
+    }
+
+    @Test
+    fun isHetRecessive() {
+        assertEquals(
+            false,
+            Trait.ACID.isHetRecessive()
+        )
+        assertEquals(
+            false,
+            Trait.BINGO.isHomoRecessive()
+        )
+        assertEquals(
+            true,
+            Trait.HET_ALBINO.isHetRecessive()
+        )
+        assertEquals(
+            true,
+            Trait.PIED.isHomoRecessive()
+        )
+        assertEquals(
+            false,
+            Trait.PIED.isHetRecessive()
         )
     }
 }

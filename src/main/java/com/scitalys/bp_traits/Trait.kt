@@ -895,7 +895,7 @@ enum class Trait(
 }
 
 /**
- * Return the number of mutation count.
+ * Return the number of mutations.
  * E.G. CRYPTON = 2
  *      CLOWN = 2
  *      PASTEL = 1
@@ -908,6 +908,20 @@ fun Trait.getMutationCount() : Int {
         return 2
     }
     return 1
+}
+
+fun Trait.isHetRecessive() : Boolean {
+    if (this.geneLG1 == null && this.geneLG2 != null) {
+        return true
+    }
+    return false
+}
+
+fun Trait.isHomoRecessive() : Boolean {
+    if (this.geneLG1 != null && this.geneLG2 != null && this.geneType == GeneType.RECESSIVE) {
+        return true
+    }
+    return false
 }
 
 enum class GeneType {

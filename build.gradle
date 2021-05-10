@@ -7,8 +7,8 @@ android {
     defaultConfig {
         minSdkVersion 25
         targetSdkVersion 30
-        versionCode 4
-        versionName "1.0.3"
+        versionCode 6
+        versionName "1.0.5"
 
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
         consumerProguardFiles "consumer-rules.pro"
@@ -39,7 +39,7 @@ afterEvaluate {
 
     def env = System.getenv()
     def github_usr = env["GITHUB_USR"]
-    def github_key = env["GITHUB_KEY"]
+    def github_packages_key = env["GITHUB_PACKAGES_KEY"]
 
     def getVersionName = { ->
         return android.defaultConfig.versionName
@@ -50,6 +50,17 @@ afterEvaluate {
     }
 
     publishing {
+
+        repositories {
+            maven {
+                name = "GitHubPackages"
+                url = uri("https://maven.pkg.github.com/beneventolorenzo/bp_traits")
+                credentials {
+                    username = github_usr
+                    password = github_packages_key
+                }
+            }
+        }
 
         publications {
             bar(MavenPublication) {
@@ -68,19 +79,10 @@ afterEvaluate {
                         dependencyNode.appendNode('version', it.version)
                     }
                 }
-            }
-        }
-        repositories {
-            maven {
-                name = "GitHubPackages"
-                url = uri("https://maven.pkg.github.com/Lorenzo1818/bp_traits")
-                credentials {
-                    username = github_usr // ?: System.getenv("GPR_USER")
-                    password = github_key // ?: System.getenv("GPR_API_KEY")
-                }
-            }
-        }
 
+                delete "$buildDir/outputs/aar/${getArtifactId()}-release.aar"
+            }
+        }
     }
 
 }
