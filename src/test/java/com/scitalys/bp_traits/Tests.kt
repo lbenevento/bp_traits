@@ -65,4 +65,44 @@ class Tests {
             Trait.PIED.isHetRecessive()
         )
     }
+
+    @Test
+    fun isHomoRecessive() {
+        assertEquals(
+            true,
+            Trait.PIED.isHomoRecessive()
+        )
+        assertEquals(
+            false,
+            Trait.CRYPTON.isHomoRecessive()
+        )
+        assertEquals(
+            true,
+            Trait.ALBINO.isHomoRecessive()
+        )
+    }
+
+    @Test
+    fun isHetCodominant() {
+        assertEquals(
+            true,
+            Trait.PASTEL.isHetCodominant()
+        )
+        assertEquals(
+            false,
+            Trait.SUPER_PASTEL.isHetCodominant()
+        )
+    }
+
+    @Test
+    fun isHomoCodominant() {
+        assertEquals(
+            false,
+            Trait.SUPER_PASTEL.isHomoRecessive()
+        )
+        assertEquals(
+            true,
+            Trait.SUPER_PASTEL.isHomoCodominant()
+        )
+    }
 }

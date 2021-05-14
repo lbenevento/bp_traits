@@ -924,6 +924,20 @@ fun Trait.isHomoRecessive() : Boolean {
     return false
 }
 
+fun Trait.isHomoCodominant() : Boolean {
+    if (this.geneLG1 != null && this.geneLG2 != null && this.geneType == GeneType.COALLELIC) {
+        return true
+    }
+    return false
+}
+
+fun Trait.isHetCodominant() : Boolean {
+    if (this.geneLG1 != null && this.geneLG2 == null) {
+        return true
+    }
+    return false
+}
+
 enum class GeneType {
     DOMINANT,
     CODOMINANT,
