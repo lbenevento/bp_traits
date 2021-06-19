@@ -123,6 +123,13 @@ enum class Trait(
         firstAppearance = 2012,
         formattedString = "Super Coral Glow"
     ),
+    SUPER_CYPRESS(
+        geneLG1 = Mutation.CYPRESS,
+        geneLG2 = Mutation.CYPRESS,
+        geneType = GeneType.COALLELIC,
+        firstAppearance = 2013,
+        formattedString = "Super Cypress"
+    ),
     SUPER_DISCO(
         geneLG1 = Mutation.DISCO,
         geneLG2 = Mutation.DISCO,
@@ -365,6 +372,12 @@ enum class Trait(
         geneType = GeneType.CODOMINANT,
         firstAppearance = 2002,
         formattedString = "Coral Glow"
+    ),
+    CYPRESS(
+        geneLG1 = Mutation.CYPRESS,
+        geneType = GeneType.CODOMINANT,
+        firstAppearance = 2012,
+        formattedString = "Cypress"
     ),
     DISCO(
         geneLG1 = Mutation.DISCO,

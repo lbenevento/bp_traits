@@ -17,6 +17,7 @@ enum class Mutation {
     CHOCOLATE,
     CINNAMON,
     CORAL_GLOW,
+    CYPRESS,
     DISCO,
     ENCHI,
     FIRE,
