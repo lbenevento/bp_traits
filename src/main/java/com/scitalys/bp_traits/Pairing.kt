@@ -1,20 +1,21 @@
-package com.scitalys.bp_traits.models
+package com.scitalys.bp_traits
 
 import com.scitalys.bp_traits.Mutation
+import com.scitalys.bp_traits.Specimen
 import com.scitalys.bp_traits.Trait
 import com.scitalys.bp_traits.utils.gcd
 
 class Pairing(
     val id: Int? = null,
-    val male: Speciment,
-    val female: Speciment,
-    private var _offspringList: MutableList<Speciment> = mutableListOf(),
+    val male: Specimen,
+    val female: Specimen,
+    private var _offspringList: MutableList<Specimen> = mutableListOf(),
     private val _totalPossibilities: Int = 0,
 ) {
 
     private val hets = mutableMapOf<Trait, Float>()
 
-    val offspringList: List<Speciment>
+    val offspringList: List<Specimen>
         get() {
             return _offspringList.sortedByDescending { it.getGeneCount() }
         }
@@ -54,7 +55,7 @@ class Pairing(
         if (speciment != null) {
             speciment.incidence += 1
         } else {
-            _offspringList.add(Speciment(traits = traitAsForSpecimentSpecs, incidence = 1))
+            _offspringList.add(Specimen(traits = traitAsForSpecimentSpecs, incidence = 1))
         }
 
         /**
@@ -118,7 +119,7 @@ class Pairing(
 /**
  * Function to know if a speciment can be het for a specified mutation.
  */
-private fun Speciment.canBeHetFor(mutation: Mutation?): Boolean {
+private fun Specimen.canBeHetFor(mutation: Mutation?): Boolean {
     this.traits.forEach { (trait, incidence) ->
         if (trait.geneLG1 != null && trait.geneLG2 != null){
             if (

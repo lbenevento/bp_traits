@@ -1,7 +1,5 @@
 package com.scitalys.bp_traits
 
-import com.scitalys.bp_traits.models.PunnettSquare
-import com.scitalys.bp_traits.models.Speciment
 import org.junit.Assert.assertEquals
 import org.junit.Assert.assertNotEquals
 import org.junit.Test
@@ -120,7 +118,7 @@ class Tests {
         )
         assertEquals(
             listOf(
-                Speciment(
+                Specimen(
                     mutableMapOf(
                         Trait.PASTEL to 1f,
                         Trait.PIED to 1f,
@@ -128,7 +126,7 @@ class Tests {
                     ),
                     1
                 ),
-                Speciment(
+                Specimen(
                     mutableMapOf(
                         Trait.PASTEL to 1f,
                         Trait.HET_ALBINO to 1f,
@@ -140,14 +138,14 @@ class Tests {
             pairing.offspringList
         )
         assertEquals(
-            Speciment(
+            Specimen(
                 traits = mutableMapOf(Trait.SUPER_PASTEL to 1f, Trait.PIED to 1f),
                 1
             ),
             pairing.male
         )
         assertEquals(
-            Speciment(
+            Specimen(
                 traits = mutableMapOf(Trait.ALBINO to 1f, Trait.HET_PIED to 1f),
                 1
             ),

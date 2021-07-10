@@ -1,8 +1,6 @@
-package com.scitalys.bp_traits.models
+package com.scitalys.bp_traits
 
-import com.scitalys.bp_traits.Trait
-
-data class Speciment(
+data class Specimen(
     var traits: MutableMap<Trait, Float>,
     var incidence: Int
 ) {

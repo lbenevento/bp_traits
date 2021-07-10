@@ -1,6 +1,7 @@
-package com.scitalys.bp_traits.models
+package com.scitalys.bp_traits
 
 import com.scitalys.bp_traits.Mutation
+import com.scitalys.bp_traits.Specimen
 import com.scitalys.bp_traits.Trait
 
 class PunnettSquare {
@@ -37,11 +38,11 @@ class PunnettSquare {
          * are supers or coallelics.
          */
         val pairing = Pairing(
-            male = Speciment(
+            male = Specimen(
                 maleTraits.toMutableMapOfTraits(),
                 1
             ),
-            female = Speciment(
+            female = Specimen(
                 femaleTraits.toMutableMapOfTraits(),
                 1
             ),
@@ -105,8 +106,8 @@ fun List<Mutation?>.toTraitsSet(): Set<Trait> {
             trait.geneLG2 != null
         ) {
             results.add(trait)
-            mutableMutationsList.remove(trait.geneLG1!!)
-            mutableMutationsList.remove(trait.geneLG2!!)
+            mutableMutationsList.remove(trait.geneLG1)
+            mutableMutationsList.remove(trait.geneLG2)
         }
         if (mutableMutationsList.size == 0) {
             break
