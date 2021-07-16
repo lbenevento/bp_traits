@@ -1,43 +1,68 @@
 package com.scitalys.bp_traits
 
-import com.scitalys.bp_traits.Mutation
-import com.scitalys.bp_traits.Specimen
-import com.scitalys.bp_traits.Trait
 import com.scitalys.bp_traits.utils.gcd
+import java.util.*
 
+/**
+ * The Pairing() class is responsible of calling [PunnettSquare], calculating the odds,
+ * removing duplicates and refactoring hets.
+ */
 class Pairing(
     val id: Int? = null,
     val male: Specimen,
     val female: Specimen,
-    private var _offspringList: MutableList<Specimen> = mutableListOf(),
-    private val _totalPossibilities: Int = 0,
+    private var _offspringMap: MutableMap<Specimen, Int> = mutableMapOf()
 ) {
 
-    private val hets = mutableMapOf<Trait, Float>()
+    private val hets: MutableMap<Trait, Float> = mutableMapOf()
 
-    val offspringList: List<Specimen>
+    val offspringMap: Map<Specimen, Int>
         get() {
-            return _offspringList.sortedByDescending { it.getGeneCount() }
+            return _offspringMap
         }
 
     val totalPossibilities: Int
-        get() {
-            var total = 0
-            _offspringList.forEach {
-                total += it.incidence
-            }
-            return total
+
+    init {
+
+        // _offspringList being empty means Pairing should calculate the offspring list itself.
+        if (_offspringMap.isEmpty()) {
+            val rawResult = PunnettSquare.calculate(male.traits.keys.toList(), female.traits.keys.toList())
+            refine(rawResult.map { it.toTraitsSet() })
         }
+        totalPossibilities = _offspringMap.map { it.value }.sum()
 
-    fun add(_offspring: Set<Trait>) {
+    }
 
-        val setOfTraits = _offspring.toMutableSet()
-        /**
-         * Counts how many times a het appears in the set and keeps track of
-         * how many times it appears in the whole clutch, then removes it.
-         * offspring val holds the new set without hets
-         */
-        for (trait in _offspring) {
+    /**
+     * Calls [handleHets] and then if it has reached the
+     * end of the list calls [insertHets] and [simplifyOdds]
+     */
+    private fun refine(rawResult: List<Set<Trait>>) {
+
+        rawResult.forEachIndexed { index, traitSet ->
+
+            handleHets(traitSet)
+
+            // If it is the last offspring added to the clutch calls [insertHets] and
+            // simplify the odds.
+            if (index == rawResult.size - 1) {
+                insertHets()
+                simplifyOdds()
+            }
+        }
+    }
+
+    /**
+     * Counts how many times a het appears in the set and keeps track of
+     * how many times it appears in the whole clutch, then removes it.
+     * offspring val holds the new set without hets
+     */
+    private fun handleHets(rawTraitList: Set<Trait>) {
+
+        val setOfTraits = rawTraitList.toMutableSet()
+
+        for (trait in rawTraitList) {
             if (trait.geneLG1 == null && trait.geneLG2 != null) {
                 if (hets[trait] != null) {
                     hets[trait] = hets[trait]!! + 1f
@@ -50,86 +75,106 @@ class Pairing(
 
         val traitAsForSpecimentSpecs =
             mutableMapOf(*setOfTraits.map { Pair(it, 1f) }.toTypedArray())
-        val speciment = _offspringList.find { it.traits == traitAsForSpecimentSpecs }
+        val speciment = _offspringMap.keys.find { it.traits == traitAsForSpecimentSpecs }
 
         if (speciment != null) {
-            speciment.incidence += 1
+            val incidence = _offspringMap[speciment]?.plus(1) ?: 1
+            _offspringMap[speciment] = incidence
         } else {
-            _offspringList.add(Specimen(traits = traitAsForSpecimentSpecs, incidence = 1))
-        }
-
-        /**
-         * If it is the last offspring added to the clutch calls [insertHets] and
-         * simplify the odds.
-         */
-        if (_offspringList.map { it.incidence }.sum() == _totalPossibilities) {
-
-            insertHets()
-
-            /**
-             * Calculate greatest common divisor and simplify every odd.
-             */
-            val gcd = _offspringList.map { it.incidence }.gcd
-            _offspringList.forEach {
-                it.incidence /= gcd
-            }
-
-            for (offspring in _offspringList) {
-                if (offspring.traits.isEmpty()) {
-                    offspring.traits[Trait.NORMAL] = 1f
-                }
-            }
+            _offspringMap[Specimen(traitAsForSpecimentSpecs)] = 1
         }
     }
 
+    /**
+     * For each hets calculates the total number of offspring that could be hets and add that
+     * in form of percentage (since you can't see hets visually) into all the non visual offsprings.
+     */
     private fun insertHets() {
-
-        /**
-         * For each hets calculates the total number of offspring that could be hets and add that
-         * in form of percentage (since you can't see hets visually) into all the non visual offsprings.
-         */
 
         hets.forEach { (trait, count) ->
 
             val hetMutation = trait.geneLG2
-            val hetTrait: Trait = Trait.fromValue(null, hetMutation)!!
+            //val hetTrait: Trait = Trait.fromValue(null, hetMutation)!!
 
             var totalPosHet = 0
-            _offspringList.forEach {
-                /**
-                 * If the speciment can't be het for the specified mutation it means that
-                 * it is a visual or has another mutation coallelic to the het.
-                 */
-                if (it.canBeHetFor(hetMutation)) {
-                    totalPosHet += it.incidence
+            _offspringMap.forEach { (specimen, incidence) ->
+
+                // If the specimen can't be het for the specified mutation it means that
+                // it is a visual or has another mutation coallelic to the het.
+                if (specimen.canBeHetFor(hetMutation)) {
+                    totalPosHet += incidence
                 }
             }
 
-            _offspringList.forEach {
-                if (it.canBeHetFor(hetMutation)) {
-                    it.traits[hetTrait] = count / totalPosHet
+            _offspringMap.forEach { (specimen, _) ->
+                if (specimen.canBeHetFor(hetMutation)) {
+                    specimen.traits[trait] = count / totalPosHet
                 }
             }
         }
+    }
 
+    /**
+     * Calculate greatest common divisor and simplify every odd.
+     */
+    private fun simplifyOdds() {
+        val gcd = _offspringMap.values.toList().gcd
+        val tmpOffspringMap: MutableMap<Specimen, Int> = mutableMapOf()
+        _offspringMap.forEach { (key, incidence) ->
+            tmpOffspringMap[key] = incidence / gcd
+        }
+        _offspringMap.clear()
+        _offspringMap.putAll(tmpOffspringMap)
+
+        for (offspring in _offspringMap.keys) {
+            if (offspring.traits.isEmpty()) {
+                offspring.traits[Trait.NORMAL] = 1f
+            }
+        }
 
     }
+
 }
 
 /**
- * Function to know if a speciment can be het for a specified mutation.
+ * Inline function to convert a list of Mutation to a set of Trait
+ *
+ * This function removes instances of double mutation and, if they are codominant (they
+ * have a super form), converts them into the respective super form.
  */
-private fun Specimen.canBeHetFor(mutation: Mutation?): Boolean {
-    this.traits.forEach { (trait, incidence) ->
-        if (trait.geneLG1 != null && trait.geneLG2 != null){
-            if (
-                Trait.fromValue(trait.geneLG1, mutation) != null || Trait.fromValue(trait.geneLG2, mutation) != null
-            ) {
-                if (incidence == 1f) {
-                    return false
-                }
-            }
+fun List<Mutation?>.toTraitsSet(): Set<Trait> {
+
+    val mutableMutationsList = this.filterNotNull().toMutableList()
+
+    val results = mutableSetOf<Trait>()
+
+    if (mutableMutationsList.isEmpty()) {
+        return setOf()
+    }
+
+    for (trait in Trait.values()) {
+        if (mutableMutationsList.contains(trait.geneLG1) &&
+            (mutableMutationsList - trait.geneLG1).contains(trait.geneLG2) &&
+            trait.geneLG1 != null &&
+            trait.geneLG2 != null
+        ) {
+            results.add(trait)
+            mutableMutationsList.remove(trait.geneLG1)
+            mutableMutationsList.remove(trait.geneLG2)
+        }
+        if (mutableMutationsList.size == 0) {
+            break
         }
     }
-    return true
+
+    for (mutation in mutableMutationsList) {
+        Trait.fromValue(mutation, null)?.let { results.add(it) }
+    }
+
+    for (mutation in mutableMutationsList) {
+        Trait.fromValue(null, mutation)?.let { results.add(it) }
+    }
+
+    return results
+
 }

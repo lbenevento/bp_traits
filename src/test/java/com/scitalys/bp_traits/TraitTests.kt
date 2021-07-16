@@ -5,21 +5,13 @@ import org.junit.Assert.assertNotEquals
 import org.junit.Test
 
 /**
- * Example local unit test, which will execute on the development machine (host).
- *
- * See [testing documentation](http://d.android.com/tools/testing).
+ * Test class for Trait companion and extension functions.
  */
-class Tests {
-    @Test
-    fun findByHetTest() {
-        assertEquals(
-            listOf(Trait.CLOWN, Trait.CRYPTON),
-            Trait.findByHet(Mutation.HET_CLOWN)
-        )
-    }
+
+class TraitTests {
 
     @Test
-    fun findByValue() {
+    fun fromValue() {
         assertEquals(
             Trait.CRYPTON,
             Trait.fromValue(Mutation.HET_CLOWN, Mutation.HET_CRYPTIC)
@@ -39,6 +31,18 @@ class Tests {
         assertNotEquals(
             Trait.HET_PIED,
             Trait.fromValue(Mutation.HET_PIED, null)
+        )
+    }
+
+    @Test
+    fun findByHetTest() {
+        assertEquals(
+            listOf(Trait.CLOWN, Trait.CRYPTON),
+            Trait.findByHet(Mutation.HET_CLOWN)
+        )
+        assertEquals(
+            listOf(Trait.PIED),
+            Trait.findByHet(Mutation.HET_PIED)
         )
     }
 
@@ -106,50 +110,4 @@ class Tests {
         )
     }
 
-    @Test
-    fun pairing() {
-        val male = setOf(Trait.SUPER_PASTEL, Trait.PIED)
-        val female = setOf(Trait.ALBINO, Trait.HET_PIED)
-        val pairing = PunnettSquare().calculate(male, female)
-
-        assertEquals(
-            2,
-            pairing.totalPossibilities
-        )
-        assertEquals(
-            listOf(
-                Specimen(
-                    mutableMapOf(
-                        Trait.PASTEL to 1f,
-                        Trait.PIED to 1f,
-                        Trait.HET_ALBINO to 1f
-                    ),
-                    1
-                ),
-                Specimen(
-                    mutableMapOf(
-                        Trait.PASTEL to 1f,
-                        Trait.HET_ALBINO to 1f,
-                        Trait.HET_PIED to 1f
-                    ),
-                    1
-                )
-            ),
-            pairing.offspringList
-        )
-        assertEquals(
-            Specimen(
-                traits = mutableMapOf(Trait.SUPER_PASTEL to 1f, Trait.PIED to 1f),
-                1
-            ),
-            pairing.male
-        )
-        assertEquals(
-            Specimen(
-                traits = mutableMapOf(Trait.ALBINO to 1f, Trait.HET_PIED to 1f),
-                1
-            ),
-            pairing.female
-        )
-    }
 }
