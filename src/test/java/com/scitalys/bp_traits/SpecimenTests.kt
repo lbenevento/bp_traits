@@ -33,6 +33,15 @@ class SpecimenTests {
     }
 
     @Test
+    fun geneCount_3() {
+        val specimen = Specimen(
+            traits = mutableMapOf()
+        )
+        val geneCount = specimen.geneCount
+        assertEquals(0, geneCount)
+    }
+
+    @Test
     fun canBeHetFor_1() {
         val specimen = Specimen(
             traits = mutableMapOf()
