@@ -38,7 +38,7 @@ class SpecimenTests {
             traits = mutableMapOf()
         )
         val geneCount = specimen.geneCount
-        assertEquals(0, geneCount)
+        assertEquals(0f, geneCount)
     }
 
     @Test

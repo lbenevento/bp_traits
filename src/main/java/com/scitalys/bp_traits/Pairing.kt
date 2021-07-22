@@ -7,27 +7,26 @@ import java.util.*
  * The Pairing() class is responsible of calling [PunnettSquare], calculating the odds,
  * removing duplicates and refactoring hets.
  */
-class Pairing(
-    val id: Int? = null,
+
+data class Pairing(
     val male: Specimen,
     val female: Specimen,
-    private var _offspringMap: MutableMap<Specimen, Int> = mutableMapOf()
+    var offspringMap: Map<Specimen, Int>? = null
 ) {
 
     private val hets: MutableMap<Trait, Float> = mutableMapOf()
 
-    val offspringMap: Map<Specimen, Int>
-        get() {
-            return _offspringMap
-        }
+    private val _offspringMap: MutableMap<Specimen, Int> = offspringMap?.toMutableMap() ?: mutableMapOf()
 
     val totalPossibilities: Int
 
     init {
 
-        // _offspringList being empty means Pairing should calculate the offspring list itself.
+        // _offspringList being empty means Pairing should calculate the offspring list itself
+        // because it was not provided.
         if (_offspringMap.isEmpty()) {
-            val rawResult = PunnettSquare.calculate(male.traits.keys.toList(), female.traits.keys.toList())
+            val rawResult =
+                PunnettSquare.calculate(male.traits.keys.toList(), female.traits.keys.toList())
             refine(rawResult.map { it.toTraitsSet() })
         }
         totalPossibilities = _offspringMap.map { it.value }.sum()
@@ -132,8 +131,29 @@ class Pairing(
             }
         }
 
+        offspringMap = _offspringMap
+
     }
 
+    override fun equals(other: Any?): Boolean {
+        if (other !is Pairing) {
+            return false
+        }
+        if (
+            totalPossibilities == other.totalPossibilities &&
+            male == other.male &&
+            female == other.female &&
+            offspringMap == other.offspringMap
+        ) return true
+        return false
+    }
+
+    override fun hashCode(): Int {
+        var result = male.hashCode()
+        result = 31 * result + female.hashCode()
+        result = 31 * result + offspringMap.hashCode()
+        return result
+    }
 }
 
 /**
