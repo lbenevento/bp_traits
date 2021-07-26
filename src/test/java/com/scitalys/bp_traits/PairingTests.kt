@@ -22,7 +22,7 @@ class PairingTests {
             )
         )
 
-        val calculatedPairing = Pairing(male = male, female = female)
+        val calculatedPairing = Pairing.fromParents(parent1 = male, parent2 = female)
         val correctPairing = Pairing(
             male = male,
             female = female,
@@ -95,7 +95,7 @@ class PairingTests {
             )
         )
 
-        val calculatedPairing = Pairing(male = male, female = female)
+        val calculatedPairing = Pairing.fromParents(parent1 = male, parent2 = female)
         val correctPairing = Pairing(
             male = male,
             female = female,
@@ -156,7 +156,7 @@ class PairingTests {
             )
         )
 
-        val calculatedPairing = Pairing(male = male, female = female)
+        val calculatedPairing = Pairing.fromParents(parent1 = male, parent2 = female)
         val correctPairing = Pairing(
             male = male,
             female = female,
@@ -204,14 +204,14 @@ class PairingTests {
 
     @Test
     fun equalsAndHashCode() {
-        val pairing1 = Pairing(
-            male = Specimen(
+        val pairing1 = Pairing.fromParents(
+            parent1 = Specimen(
                 traits = mutableMapOf(
                     Trait.ENCHI to 1f,
                     Trait.PASTEL to 1f
                 )
             ),
-            female = Specimen(
+            parent2 = Specimen(
                 traits = mutableMapOf(
                     Trait.SUPER_PASTEL to 1f,
                     Trait.HET_GHOST to 1f
@@ -247,14 +247,14 @@ class PairingTests {
             )
         )
 
-        val pairing3 = Pairing(
-            male = Specimen(
+        val pairing3 = Pairing.fromParents(
+            parent1 = Specimen(
                 traits = mutableMapOf(
                     Trait.PASTEL to 1f,
                     Trait.ENCHI to 1f
                 )
             ),
-            female = Specimen(
+            parent2 = Specimen(
                 traits = mutableMapOf(
                     Trait.SUPER_PASTEL to 1f,
                     Trait.GHOST to 1f

@@ -1,139 +1,18 @@
 package com.scitalys.bp_traits
 
 import com.scitalys.bp_traits.utils.gcd
-import java.util.*
 
 /**
  * The Pairing() class is responsible of calling [PunnettSquare], calculating the odds,
  * removing duplicates and refactoring hets.
  */
-
 data class Pairing(
     val male: Specimen,
     val female: Specimen,
-    var offspringMap: Map<Specimen, Int>? = null
+    var offspringMap: Map<Specimen, Int>
 ) {
 
-    private val hets: MutableMap<Trait, Float> = mutableMapOf()
-
-    private val _offspringMap: MutableMap<Specimen, Int> = offspringMap?.toMutableMap() ?: mutableMapOf()
-
-    val totalPossibilities: Int
-
-    init {
-
-        // _offspringList being empty means Pairing should calculate the offspring list itself
-        // because it was not provided.
-        if (_offspringMap.isEmpty()) {
-            val rawResult =
-                PunnettSquare.calculate(male.traits.keys.toList(), female.traits.keys.toList())
-            refine(rawResult.map { it.toTraitsSet() })
-        }
-        totalPossibilities = _offspringMap.map { it.value }.sum()
-
-    }
-
-    /**
-     * Calls [handleHets] and then if it has reached the
-     * end of the list calls [insertHets] and [simplifyOdds]
-     */
-    private fun refine(rawResult: List<Set<Trait>>) {
-
-        rawResult.forEachIndexed { index, traitSet ->
-
-            handleHets(traitSet)
-
-            // If it is the last offspring added to the clutch calls [insertHets] and
-            // simplify the odds.
-            if (index == rawResult.size - 1) {
-                insertHets()
-                simplifyOdds()
-            }
-        }
-    }
-
-    /**
-     * Counts how many times a het appears in the set and keeps track of
-     * how many times it appears in the whole clutch, then removes it.
-     * offspring val holds the new set without hets
-     */
-    private fun handleHets(rawTraitList: Set<Trait>) {
-
-        val setOfTraits = rawTraitList.toMutableSet()
-
-        for (trait in rawTraitList) {
-            if (trait.geneLG1 == null && trait.geneLG2 != null) {
-                if (hets[trait] != null) {
-                    hets[trait] = hets[trait]!! + 1f
-                } else {
-                    hets[trait] = 1f
-                }
-                setOfTraits -= trait
-            }
-        }
-
-        val traitAsForSpecimentSpecs =
-            mutableMapOf(*setOfTraits.map { Pair(it, 1f) }.toTypedArray())
-        val speciment = _offspringMap.keys.find { it.traits == traitAsForSpecimentSpecs }
-
-        if (speciment != null) {
-            val incidence = _offspringMap[speciment]?.plus(1) ?: 1
-            _offspringMap[speciment] = incidence
-        } else {
-            _offspringMap[Specimen(traitAsForSpecimentSpecs)] = 1
-        }
-    }
-
-    /**
-     * For each hets calculates the total number of offspring that could be hets and add that
-     * in form of percentage (since you can't see hets visually) into all the non visual offsprings.
-     */
-    private fun insertHets() {
-
-        hets.forEach { (trait, count) ->
-
-            val hetMutation = trait.geneLG2
-            //val hetTrait: Trait = Trait.fromValue(null, hetMutation)!!
-
-            var totalPosHet = 0
-            _offspringMap.forEach { (specimen, incidence) ->
-
-                // If the specimen can't be het for the specified mutation it means that
-                // it is a visual or has another mutation coallelic to the het.
-                if (specimen.canBeHetFor(hetMutation)) {
-                    totalPosHet += incidence
-                }
-            }
-
-            _offspringMap.forEach { (specimen, _) ->
-                if (specimen.canBeHetFor(hetMutation)) {
-                    specimen.traits[trait] = count / totalPosHet
-                }
-            }
-        }
-    }
-
-    /**
-     * Calculate greatest common divisor and simplify every odd.
-     */
-    private fun simplifyOdds() {
-        val gcd = _offspringMap.values.toList().gcd
-        val tmpOffspringMap: MutableMap<Specimen, Int> = mutableMapOf()
-        _offspringMap.forEach { (key, incidence) ->
-            tmpOffspringMap[key] = incidence / gcd
-        }
-        _offspringMap.clear()
-        _offspringMap.putAll(tmpOffspringMap)
-
-        for (offspring in _offspringMap.keys) {
-            if (offspring.traits.isEmpty()) {
-                offspring.traits[Trait.NORMAL] = 1f
-            }
-        }
-
-        offspringMap = _offspringMap
-
-    }
+    val totalPossibilities: Int = offspringMap.map { it.value }.sum()
 
     override fun equals(other: Any?): Boolean {
         if (other !is Pairing) {
@@ -153,6 +32,166 @@ data class Pairing(
         result = 31 * result + female.hashCode()
         result = 31 * result + offspringMap.hashCode()
         return result
+    }
+
+    /**
+     * The companion object contains the [fromParents] function which allows to create
+     * a pairing object only knowing the parents.
+     */
+    companion object {
+
+        fun fromParents(parent1: Specimen, parent2: Specimen): Pairing {
+            val rawResult =
+                PunnettSquare.calculate(parent1.traits.keys.toList(), parent2.traits.keys.toList())
+            val offspringMap = refine(rawResult.map { it.toTraitsSet() })
+
+            return Pairing(parent1, parent2, offspringMap)
+        }
+
+
+        /**
+         * Calls [separateHets] and then if it has reached the
+         * end of the list calls [insertHets] and [simplifyOdds]
+         */
+        private fun refine(rawResult: List<Set<Trait>>): Map<Specimen, Int> {
+
+
+            val hets: MutableMap<Trait, Float> = mutableMapOf()
+            val offspringMap: MutableMap<Specimen, Int> = mutableMapOf()
+
+            separateHets(
+                rawResults = rawResult,
+                hets = hets,
+                offspringMap = offspringMap
+            )
+
+            insertHets(
+                hets = hets,
+                offspringMap = offspringMap
+            )
+            simplifyOdds(
+                offspringMap
+            )
+
+            return offspringMap
+
+        }
+
+        /**
+         * This function does the following for every offspring in rawResult:
+         * - Search and removes hets.
+         * - Insert the het into hets or increment its count if it is already present.
+         * - Insert offspring without hets into offspringMap or increment its count if
+         *   it is already present.
+         */
+        private fun separateHets(
+            rawResults: List<Set<Trait>>,
+            hets: MutableMap<Trait, Float>,
+            offspringMap: MutableMap<Specimen, Int>
+        ) {
+            rawResults.forEach { rawResult ->
+
+                val mutableRawResult = rawResult.toMutableSet()
+
+                // Every trait in rawResult which is a heterozygous recessive
+                // gets removed from mutableRawResult and added to hets mapping it
+                // to how many times it appears in the whole offsprings list.
+                rawResult.forEach { trait ->
+                    if (trait.isHetRecessive()) {
+                        if (hets[trait] != null) {
+                            hets[trait] = hets[trait]!! + 1f
+                        } else {
+                            hets[trait] = 1f
+                        }
+                        mutableRawResult -= trait
+                    }
+                }
+
+                // The new traits set without hets gets now transformed into a map
+                // with every mutation being at 100% since they are all visual mutations
+                // at this point.
+                val traitsMap = mutableMapOf(
+                    *mutableRawResult.map { Pair(it, 1f) }.toTypedArray()
+                )
+
+                // Search the offspringMap for a specimen with the newly created traitsMap
+                val specimen = offspringMap.keys.find { it.traits == traitsMap }
+
+                // If specimen is null it means there was not an identical specimen already
+                // in the list so we create it and assign it an incidence of 1. Otherwise
+                // we just increment by one the incidence of the already present identical
+                // specimen in the map.
+                if (specimen != null) {
+                    val incidence = offspringMap[specimen]?.plus(1) ?: 1
+                    offspringMap[specimen] = incidence
+                } else {
+                    offspringMap[Specimen(traitsMap)] = 1
+                }
+
+            }
+        }
+
+        /**
+         * Add back every het to the offspringMap with a probability equals to how many times
+         * the het appeared in the List<Set<Trait>> given back by [PunnettSquare.calculate]
+         * divided the number of every specimen which COULD be het for it.
+         */
+        private fun insertHets(
+            hets: MutableMap<Trait, Float>,
+            offspringMap: MutableMap<Specimen, Int>
+        ) {
+
+            hets.forEach { (trait, count) ->
+
+                // Extract the mutation from the trait.
+                val hetMutation = trait.geneLG2
+
+                // This variable holds the number of offspring which CAN have an heterozygosis
+                // for the mutation referred by hetMutation
+                var totalPosHet = 0
+                // For every specimen in offspringMap check if it can have an
+                // heterozygosis of the specified mutation. If it can totalPosHet
+                // gets incremented by the incidence of that specimen.
+                offspringMap.forEach { (specimen, incidence) ->
+                    if (specimen.canBeHetFor(hetMutation)) {
+                        totalPosHet += incidence
+                    }
+                }
+
+                // Adds the het with the correct probability
+                // to ALL specimens (since you cannot visually tell)
+                offspringMap.forEach { (specimen, _) ->
+                    if (specimen.canBeHetFor(hetMutation)) {
+                        specimen.traits[trait] = count / totalPosHet
+                    }
+                }
+
+            }
+        }
+
+        /**
+         * Calculate greatest common divisor and simplify every odd.
+         */
+        private fun simplifyOdds(
+            offspringMap: MutableMap<Specimen, Int>
+        ) {
+            val gcd = offspringMap.values.toList().gcd
+            // A temporary map is created to avoid concurrentModifications
+            val tmpOffspringMap: MutableMap<Specimen, Int> = mutableMapOf()
+            offspringMap.forEach { (key, incidence) ->
+                tmpOffspringMap[key] = incidence / gcd
+            }
+            // Clear the old list and put the new pairings in.
+            offspringMap.clear()
+            offspringMap.putAll(tmpOffspringMap)
+
+            for (offspring in offspringMap.keys) {
+                if (offspring.traits.isEmpty()) {
+                    offspring.traits[Trait.NORMAL] = 1f
+                }
+            }
+        }
+
     }
 }
 
