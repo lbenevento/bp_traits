@@ -111,17 +111,17 @@ data class Pairing(
                 // with every mutation being at 100% since they are all visual mutations
                 // at this point.
                 val traitsMap = mutableMapOf(
-                    *mutableRawResult.map { Pair(it, 1f) }.toTypedArray()
+                    *mutableRawResult.map { it to 1f }.toTypedArray()
                 )
 
-                // Search the offspringMap for a specimen with the newly created traitsMap
-                val specimen = offspringMap.keys.find { it.traits == traitsMap }
+                // Create a specimen with the new trait set.
+                val specimen = Specimen(traits = traitsMap)
 
                 // If specimen is null it means there was not an identical specimen already
                 // in the list so we create it and assign it an incidence of 1. Otherwise
                 // we just increment by one the incidence of the already present identical
                 // specimen in the map.
-                if (specimen != null) {
+                if (offspringMap.keys.find { it == specimen } != null) {
                     val incidence = offspringMap[specimen]?.plus(1) ?: 1
                     offspringMap[specimen] = incidence
                 } else {

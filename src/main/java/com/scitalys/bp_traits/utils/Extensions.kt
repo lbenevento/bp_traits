@@ -9,6 +9,9 @@ inline val List<Int>.gcd: Int
         return result
     }
 
+inline val MutableCollection<Int>.gcd: Int
+    get() = this.toList().gcd
+
 fun gcd(a: Int, b: Int): Int{
     return if (a == 0) b
     else gcd(b % a, a)

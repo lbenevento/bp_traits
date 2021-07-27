@@ -34,7 +34,7 @@ dependencies {
 
 }
 
-//Publishing
+// Publishing
 
 apply plugin: 'maven-publish'
 

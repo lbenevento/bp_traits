@@ -72,4 +72,15 @@ class SpecimenTests {
         assertEquals(true, specimen.canBeHetFor(Mutation.HET_DESERT_GHOST))
     }
 
+    @Test
+    fun nullInit() {
+        val specimen = Specimen(
+            traits = mutableMapOf()
+        )
+        val expectedSpecimen = Specimen(
+            traits = mutableMapOf(Trait.NORMAL to 1f)
+        )
+        assertEquals(specimen, expectedSpecimen)
+    }
+
 }

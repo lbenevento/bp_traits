@@ -1,8 +1,16 @@
 package com.scitalys.bp_traits
 
 data class Specimen(
-    var traits: MutableMap<Trait, Float>
-)
+    val traits: MutableMap<Trait, Float>
+) {
+    // If the specimen was initialized with an empty map add the NORMAL trait
+    // since that's what a specimen with no mutations is.
+    init {
+        if (traits.isEmpty()) {
+            traits[Trait.NORMAL] = 1f
+        }
+    }
+}
 
 /**
  * This function is used to sort specimen. It returns the number of mutations of that specimen.

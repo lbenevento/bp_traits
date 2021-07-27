@@ -67,7 +67,8 @@ class PairingTests {
                 // 6
                 Specimen(
                     traits = mutableMapOf(
-                        Pair(Trait.HET_PIED, .5f)
+                        Trait.NORMAL to 1f,
+                        Trait.HET_PIED to .5f
                     )
                 ) to 1,
             )
@@ -164,33 +165,34 @@ class PairingTests {
                 // 1
                 Specimen(
                     traits = mutableMapOf(
-                        Pair(Trait.PASTEL, 1f),
-                        Pair(Trait.ENCHI, 1f),
-                        Pair(Trait.HET_CLOWN, .5f),
-                        Pair(Trait.HET_CRYPTIC, .5f)
+                        Trait.PASTEL to 1f,
+                        Trait.ENCHI to 1f,
+                        Trait.HET_CLOWN to .5f,
+                        Trait.HET_CRYPTIC to .5f
                     )
                 ) to 1,
                 // 2
                 Specimen(
                     traits = mutableMapOf(
-                        Pair(Trait.ENCHI, 1f),
-                        Pair(Trait.HET_CLOWN, .5f),
-                        Pair(Trait.HET_CRYPTIC, .5f)
+                        Trait.ENCHI to 1f,
+                        Trait.HET_CLOWN to .5f,
+                        Trait.HET_CRYPTIC to .5f
                     )
                 ) to 1,
                 // 3
                 Specimen(
                     traits = mutableMapOf(
-                        Pair(Trait.PASTEL, 1f),
-                        Pair(Trait.HET_CLOWN, .5f),
-                        Pair(Trait.HET_CRYPTIC, .5f)
+                        Trait.PASTEL to 1f,
+                        Trait.HET_CLOWN to .5f,
+                        Trait.HET_CRYPTIC to .5f
                     )
                 ) to 1,
                 // 4
                 Specimen(
                     traits = mutableMapOf(
-                        Pair(Trait.HET_CLOWN, .5f),
-                        Pair(Trait.HET_CRYPTIC, .5f)
+                        Trait.NORMAL to 1f,
+                        Trait.HET_CLOWN to .5f,
+                        Trait.HET_CRYPTIC to .5f
                     )
                 ) to 1
             )
