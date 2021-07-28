@@ -1,6 +1,7 @@
 package com.scitalys.bp_traits
 
 import com.scitalys.bp_traits.utils.gcd
+import java.util.*
 
 /**
  * The Pairing() class is responsible of calling [PunnettSquare], calculating the odds,
@@ -9,7 +10,7 @@ import com.scitalys.bp_traits.utils.gcd
 data class Pairing(
     val male: Specimen,
     val female: Specimen,
-    var offspringMap: Map<Specimen, Int>
+    var offspringMap: SortedMap<Specimen, Int>
 ) {
 
     val totalPossibilities: Int = offspringMap.map { it.value }.sum()
@@ -18,11 +19,25 @@ data class Pairing(
         if (other !is Pairing) {
             return false
         }
+        var areOffspringMapsEquals = false
+
+        val thisOffspringMapAsList = offspringMap.toList()
+        val otherOffspringMapAsList = other.offspringMap.toList()
+
+        // If the sizes are different there is no reason to keep going with further checks.
+        if (thisOffspringMapAsList.size != otherOffspringMapAsList.size) return false
+
+        thisOffspringMapAsList.forEachIndexed { index, pair ->
+            val otherPair = otherOffspringMapAsList[index]
+            areOffspringMapsEquals =
+                otherPair.first == pair.first &&
+                otherPair.second == pair.second
+        }
         if (
             totalPossibilities == other.totalPossibilities &&
             male == other.male &&
             female == other.female &&
-            offspringMap == other.offspringMap
+            areOffspringMapsEquals
         ) return true
         return false
     }
@@ -53,7 +68,7 @@ data class Pairing(
          * Calls [separateHets] and then if it has reached the
          * end of the list calls [insertHets] and [simplifyOdds]
          */
-        private fun refine(rawResult: List<Set<Trait>>): Map<Specimen, Int> {
+        private fun refine(rawResult: List<Set<Trait>>): SortedMap<Specimen, Int> {
 
 
             val hets: MutableMap<Trait, Float> = mutableMapOf()
@@ -72,8 +87,12 @@ data class Pairing(
             simplifyOdds(
                 offspringMap
             )
-
-            return offspringMap
+            return offspringMap.toSortedMap(
+                compareBy(
+                    { it.geneCount },
+                    { it.formattedString }
+                )
+            )
 
         }
 

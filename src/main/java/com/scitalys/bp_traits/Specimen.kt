@@ -3,12 +3,42 @@ package com.scitalys.bp_traits
 data class Specimen(
     val traits: MutableMap<Trait, Float>
 ) {
+
+    val formattedString: String
+
     // If the specimen was initialized with an empty map add the NORMAL trait
     // since that's what a specimen with no mutations is.
     init {
         if (traits.isEmpty()) {
             traits[Trait.NORMAL] = 1f
         }
+
+        // Calculate formattedString
+        var tmpFormattedString = ""
+        traits.toList().forEachIndexed { index, (trait, probability) ->
+            if (index != 0) {
+                tmpFormattedString += " "
+            }
+            tmpFormattedString += if (probability != 1f) {
+                "%1\$d%% %2\$s".format((probability * 100).toInt(), trait)
+            } else {
+                trait.formattedString
+            }
+        }
+        formattedString = tmpFormattedString
+
+    }
+
+    override fun equals(other: Any?): Boolean {
+        if (other !is Specimen) return false
+        val thisSortedMap = traits.toSortedMap(compareBy { it.ordinal })
+        val otherSortedMap = other.traits.toSortedMap(compareBy { it.ordinal })
+        if (thisSortedMap == otherSortedMap) return true
+        return false
+    }
+
+    override fun hashCode(): Int {
+        return traits.hashCode()
     }
 }
 

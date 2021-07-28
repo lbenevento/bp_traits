@@ -26,7 +26,8 @@ class PairingTests {
         val correctPairing = Pairing(
             male = male,
             female = female,
-            offspringMap = mutableMapOf(
+            offspringMap = sortedMapOf(
+                compareBy({ it.geneCount }, { it.formattedString }),
                 // 1
                 Specimen(
                     traits = mutableMapOf(
@@ -46,24 +47,24 @@ class PairingTests {
                 // 3
                 Specimen(
                     traits = mutableMapOf(
-                        Pair(Trait.PASTEL, 1f),
+                        Pair(Trait.SUPER_ENCHI, 1f),
                         Pair(Trait.HET_PIED, .5f)
                     )
                 ) to 1,
                 // 4
                 Specimen(
                     traits = mutableMapOf(
-                        Pair(Trait.SUPER_ENCHI, 1f),
-                        Pair(Trait.HET_PIED, .5f)
-                    )
-                ) to 1,
-                // 5
-                Specimen(
-                    traits = mutableMapOf(
                         Pair(Trait.ENCHI, 1f),
                         Pair(Trait.HET_PIED, .5f)
                     )
                 ) to 2,
+                // 5
+                Specimen(
+                    traits = mutableMapOf(
+                        Pair(Trait.PASTEL, 1f),
+                        Pair(Trait.HET_PIED, .5f)
+                    )
+                ) to 1,
                 // 6
                 Specimen(
                     traits = mutableMapOf(
@@ -74,10 +75,7 @@ class PairingTests {
             )
         )
 
-        assertEquals(correctPairing.male, calculatedPairing.male)
-        assertEquals(correctPairing.female, calculatedPairing.female)
-        assertEquals(correctPairing.offspringMap, calculatedPairing.offspringMap)
-        assertEquals(8, calculatedPairing.totalPossibilities)
+        assertEquals(correctPairing, calculatedPairing)
     }
 
     @Test
@@ -100,7 +98,8 @@ class PairingTests {
         val correctPairing = Pairing(
             male = male,
             female = female,
-            offspringMap = mutableMapOf(
+            offspringMap = sortedMapOf(
+                compareBy { it.geneCount },
                 // 1
                 Specimen(
                     traits = mutableMapOf(
@@ -113,15 +112,14 @@ class PairingTests {
                 // 2
                 Specimen(
                     traits = mutableMapOf(
+                        Pair(Trait.PASTEL, 1f),
                         Pair(Trait.ENCHI, 1f),
-                        Pair(Trait.HET_CLOWN, .33333334f),
-                        Pair(Trait.HET_CRYPTIC, .33333334f)
+                        Pair(Trait.CRYPTON, 1f)
                     )
-                ) to 3,
+                ) to 1,
                 // 3
                 Specimen(
                     traits = mutableMapOf(
-                        Pair(Trait.PASTEL, 1f),
                         Pair(Trait.ENCHI, 1f),
                         Pair(Trait.CRYPTON, 1f)
                     )
@@ -130,16 +128,14 @@ class PairingTests {
                 Specimen(
                     traits = mutableMapOf(
                         Pair(Trait.ENCHI, 1f),
-                        Pair(Trait.CRYPTON, 1f)
+                        Pair(Trait.HET_CLOWN, .33333334f),
+                        Pair(Trait.HET_CRYPTIC, .33333334f)
                     )
-                ) to 1
+                ) to 3,
             )
         )
 
-        assertEquals(correctPairing.male, calculatedPairing.male)
-        assertEquals(correctPairing.female, calculatedPairing.female)
-        assertEquals(correctPairing.offspringMap, calculatedPairing.offspringMap)
-        assertEquals(8, calculatedPairing.totalPossibilities)
+        assertEquals(correctPairing, calculatedPairing)
     }
 
     @Test
@@ -161,7 +157,8 @@ class PairingTests {
         val correctPairing = Pairing(
             male = male,
             female = female,
-            offspringMap = mutableMapOf(
+            offspringMap = sortedMapOf(
+                compareBy({ it.geneCount }, { it.formattedString }),
                 // 1
                 Specimen(
                     traits = mutableMapOf(
@@ -198,10 +195,7 @@ class PairingTests {
             )
         )
 
-        assertEquals(correctPairing.male, calculatedPairing.male)
-        assertEquals(correctPairing.female, calculatedPairing.female)
-        assertEquals(correctPairing.offspringMap, calculatedPairing.offspringMap)
-        assertEquals(4, calculatedPairing.totalPossibilities)
+        assertEquals(correctPairing, calculatedPairing)
     }
 
     @Test
@@ -233,19 +227,43 @@ class PairingTests {
                     Trait.HET_GHOST to 1f
                 )
             ),
-            offspringMap = mutableMapOf(
-                Specimen(
-                    traits = mutableMapOf(Trait.HET_GHOST to .5f, Trait.PASTEL to 1f)
-                ) to 1,
-                Specimen(
-                    traits = mutableMapOf(Trait.ENCHI to 1f, Trait.PASTEL to 1f, Trait.HET_GHOST to .5f)
-                ) to 1,
-                Specimen(
-                    traits = mutableMapOf(Trait.SUPER_PASTEL to 1f, Trait.ENCHI to 1f, Trait.HET_GHOST to .5f)
-                ) to 1,
-                Specimen(
-                    traits = mutableMapOf(Trait.SUPER_PASTEL to 1f, Trait.HET_GHOST to .5f)
-                ) to 1
+            offspringMap = sortedMapOf(
+                compareBy(
+                    { it.geneCount },
+                    { it.formattedString }
+                ),
+                // 1
+                Pair(
+                    Specimen(
+                        traits = mutableMapOf(
+                            Trait.SUPER_PASTEL to 1f,
+                            Trait.ENCHI to 1f,
+                            Trait.HET_GHOST to .5f
+                        )
+                    ), 1
+                ),
+                // 2
+                Pair(
+                    Specimen(
+                        traits = mutableMapOf(
+                            Trait.ENCHI to 1f,
+                            Trait.PASTEL to 1f,
+                            Trait.HET_GHOST to .5f
+                        )
+                    ), 1
+                ),
+                // 3
+                Pair(
+                    Specimen(
+                        traits = mutableMapOf(Trait.HET_GHOST to .5f, Trait.PASTEL to 1f)
+                    ), 1
+                ),
+                // 4
+                Pair(
+                    Specimen(
+                        traits = mutableMapOf(Trait.SUPER_PASTEL to 1f, Trait.HET_GHOST to .5f)
+                    ), 1
+                ),
             )
         )
 
