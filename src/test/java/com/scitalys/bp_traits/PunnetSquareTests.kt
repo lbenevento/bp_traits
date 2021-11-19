@@ -11,13 +11,13 @@ class PunnetSquareTests {
     @Test
     fun calculate1() {
 
-        val male = listOf(
-            Trait.PASTEL,
-            Trait.ENCHI
+        val male = setOf(
+            LociPair(Mutation.PASTEL),
+            LociPair(Mutation.ENCHI)
         )
-        val female = listOf(
-            Trait.ENCHI,
-            Trait.HET_PIED
+        val female = setOf(
+            LociPair(Mutation.ENCHI),
+            LociPair(null, Mutation.HET_PIED)
         )
 
         val calculatedList = PunnettSquare.calculate(male, female)
@@ -123,13 +123,13 @@ class PunnetSquareTests {
     @Test
     fun calculate2() {
 
-        val male = listOf(
-            Trait.PASTEL,
-            Trait.HET_CRYPTIC
+        val male = setOf(
+            LociPair(Mutation.PASTEL),
+            LociPair(null, Mutation.HET_CRYPTIC)
         )
-        val female = listOf(
-            Trait.SUPER_ENCHI,
-            Trait.HET_CLOWN
+        val female = setOf(
+            LociPair(Mutation.ENCHI, Mutation.ENCHI),
+            LociPair(null, Mutation.HET_CLOWN)
         )
 
         val calculatedList = PunnettSquare.calculate(male, female)

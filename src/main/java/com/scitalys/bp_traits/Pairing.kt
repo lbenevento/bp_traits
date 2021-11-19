@@ -57,8 +57,8 @@ data class Pairing(
 
         fun fromParents(parent1: Specimen, parent2: Specimen): Pairing {
             val rawResult =
-                PunnettSquare.calculate(parent1.traits.keys.toList(), parent2.traits.keys.toList())
-            val offspringMap = refine(rawResult.map { it.toTraitsSet() })
+                PunnettSquare.calculate(parent1.morph.keys, parent2.morph.keys)
+            val offspringMap = refine(rawResult.map { it.toLociPairSet() })
 
             return Pairing(parent1, parent2, offspringMap)
         }
@@ -68,10 +68,10 @@ data class Pairing(
          * Calls [separateHets] and then if it has reached the
          * end of the list calls [insertHets] and [simplifyOdds]
          */
-        private fun refine(rawResult: List<Set<Trait>>): SortedMap<Specimen, Int> {
+        private fun refine(rawResult: List<Set<LociPair>>): SortedMap<Specimen, Int> {
 
 
-            val hets: MutableMap<Trait, Float> = mutableMapOf()
+            val hets: MutableMap<LociPair, Float> = mutableMapOf()
             val offspringMap: MutableMap<Specimen, Int> = mutableMapOf()
 
             separateHets(
@@ -89,7 +89,7 @@ data class Pairing(
             )
             return offspringMap.toSortedMap(
                 compareBy(
-                    { it.geneCount },
+                    { it.mutationsCount },
                     { it.formattedString }
                 )
             )
@@ -104,8 +104,8 @@ data class Pairing(
          *   it is already present.
          */
         private fun separateHets(
-            rawResults: List<Set<Trait>>,
-            hets: MutableMap<Trait, Float>,
+            rawResults: List<Set<LociPair>>,
+            hets: MutableMap<LociPair, Float>,
             offspringMap: MutableMap<Specimen, Int>
         ) {
             rawResults.forEach { rawResult ->
@@ -115,14 +115,14 @@ data class Pairing(
                 // Every trait in rawResult which is a heterozygous recessive
                 // gets removed from mutableRawResult and added to hets mapping it
                 // to how many times it appears in the whole offsprings list.
-                rawResult.forEach { trait ->
-                    if (trait.isHetRecessive()) {
-                        if (hets[trait] != null) {
-                            hets[trait] = hets[trait]!! + 1f
+                rawResult.forEach { lociPair ->
+                    if (lociPair.isHetRecessive()) {
+                        if (hets[lociPair] != null) {
+                            hets[lociPair] = hets[lociPair]!! + 1f
                         } else {
-                            hets[trait] = 1f
+                            hets[lociPair] = 1f
                         }
-                        mutableRawResult -= trait
+                        mutableRawResult -= lociPair
                     }
                 }
 
@@ -134,7 +134,7 @@ data class Pairing(
                 )
 
                 // Create a specimen with the new trait set.
-                val specimen = Specimen(traits = traitsMap)
+                val specimen = Specimen(morphMap = traitsMap)
 
                 // If specimen is null it means there was not an identical specimen already
                 // in the list so we create it and assign it an incidence of 1. Otherwise
@@ -156,14 +156,14 @@ data class Pairing(
          * divided the number of every specimen which COULD be het for it.
          */
         private fun insertHets(
-            hets: MutableMap<Trait, Float>,
+            hets: MutableMap<LociPair, Float>,
             offspringMap: MutableMap<Specimen, Int>
         ) {
 
-            hets.forEach { (trait, count) ->
+            hets.forEach { (lociPair, count) ->
 
                 // Extract the mutation from the trait.
-                val hetMutation = trait.geneLG2
+                val hetMutation = lociPair.locus2
 
                 // This variable holds the number of offspring which CAN have an heterozygosis
                 // for the mutation referred by hetMutation
@@ -181,7 +181,7 @@ data class Pairing(
                 // to ALL specimens (since you cannot visually tell)
                 offspringMap.forEach { (specimen, _) ->
                     if (specimen.canBeHetFor(hetMutation)) {
-                        specimen.traits[trait] = count / totalPosHet
+                        specimen.morph[lociPair] = count / totalPosHet
                     }
                 }
 
@@ -205,8 +205,8 @@ data class Pairing(
             offspringMap.putAll(tmpOffspringMap)
 
             for (offspring in offspringMap.keys) {
-                if (offspring.traits.isEmpty()) {
-                    offspring.traits[Trait.NORMAL] = 1f
+                if (offspring.morph.isEmpty()) {
+                    offspring.morph[LociPair()] = 1f
                 }
             }
         }
@@ -251,6 +251,44 @@ fun List<Mutation?>.toTraitsSet(): Set<Trait> {
 
     for (mutation in mutableMutationsList) {
         Trait.fromValue(null, mutation)?.let { results.add(it) }
+    }
+
+    return results
+
+}
+
+fun List<Mutation?>.toLociPairSet(): Set<LociPair> {
+
+    val mutableMutationsList = this.filterNotNull().toMutableList()
+
+    val results = mutableSetOf<LociPair>()
+
+    if (mutableMutationsList.isEmpty()) {
+        return setOf()
+    }
+
+    for (morph in Morph.values().filter { it.mutations.size == 1 }) {
+        val loci = morph.mutations.first()
+        if (mutableMutationsList.contains(loci.locus1) &&
+            (mutableMutationsList - loci.locus1).contains(loci.locus2) &&
+            loci.locus1 != null &&
+            loci.locus2 != null
+        ) {
+            results.add(loci)
+            mutableMutationsList.remove(loci.locus1)
+            mutableMutationsList.remove(loci.locus2)
+        }
+        if (mutableMutationsList.size == 0) {
+            break
+        }
+    }
+
+    for (mutation in mutableMutationsList) {
+        Morph.fromValue(LociPair(mutation, null))?.let { results.add(it.mutations.first()) }
+    }
+
+    for (mutation in mutableMutationsList) {
+        Morph.fromValue(LociPair(null, mutation))?.let { results.add(it.mutations.first()) }
     }
 
     return results

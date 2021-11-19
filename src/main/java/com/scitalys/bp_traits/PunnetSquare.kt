@@ -2,7 +2,7 @@ package com.scitalys.bp_traits
 
 object PunnettSquare {
 
-    fun calculate(parent1: List<Trait>, parent2: List<Trait>): List<List<Mutation?>> {
+    fun calculate(parent1: Set<LociPair>, parent2: Set<LociPair>): List<List<Mutation?>> {
 
         /**
          * Calculate the table headers using generatePermutations()
@@ -31,7 +31,7 @@ object PunnettSquare {
      * Recursive function used to generate permutations
      */
     private fun generatePermutations(
-        lists: List<Trait>,
+        lists: Set<LociPair>,
         result: MutableSet<List<Mutation?>>,
         depth: Int,
         current: List<Mutation?>
@@ -42,8 +42,8 @@ object PunnettSquare {
             return
         }
 
-        val gene1 = lists.elementAt(depth).geneLG1
-        val gene2 = lists.elementAt(depth).geneLG2
+        val gene1 = lists.elementAt(depth).locus1
+        val gene2 = lists.elementAt(depth).locus2
 
 
         generatePermutations(lists, result, depth + 1, current + gene1)

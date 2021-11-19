@@ -10,15 +10,15 @@ class PairingTests {
     fun pairing1() {
 
         val male = Specimen(
-            traits = mutableMapOf(
-                Pair(Trait.ENCHI, 1f),
-                Pair(Trait.HET_PIED, 1f),
+            morphMap = mutableMapOf(
+                LociPair(Mutation.ENCHI) to 1f,
+                LociPair(null, Mutation.HET_PIED) to 1f
             )
         )
         val female = Specimen(
-            traits = mutableMapOf(
-                Pair(Trait.PASTEL, 1f),
-                Pair(Trait.ENCHI, 1f),
+            morphMap = mutableMapOf(
+                LociPair(Mutation.PASTEL) to 1f,
+                LociPair(Mutation.ENCHI) to 1f
             )
         )
 
@@ -27,49 +27,49 @@ class PairingTests {
             male = male,
             female = female,
             offspringMap = sortedMapOf(
-                compareBy({ it.geneCount }, { it.formattedString }),
+                compareBy({ it.mutationsCount }, { it.formattedString }),
                 // 1
                 Specimen(
-                    traits = mutableMapOf(
-                        Pair(Trait.PASTEL, 1f),
-                        Pair(Trait.SUPER_ENCHI, 1f),
-                        Pair(Trait.HET_PIED, .5f)
+                    morphMap = mutableMapOf(
+                        LociPair(Mutation.PASTEL) to 1f,
+                        LociPair(Mutation.ENCHI, Mutation.ENCHI) to 1f,
+                        LociPair(null, Mutation.HET_PIED) to .5f
                     )
                 ) to 1,
                 // 2
                 Specimen(
-                    traits = mutableMapOf(
-                        Pair(Trait.PASTEL, 1f),
-                        Pair(Trait.ENCHI, 1f),
-                        Pair(Trait.HET_PIED, .5f)
+                    morphMap = mutableMapOf(
+                        LociPair(Mutation.PASTEL) to 1f,
+                        LociPair(Mutation.ENCHI) to 1f,
+                        LociPair(null, Mutation.HET_PIED) to .5f
                     )
                 ) to 2,
                 // 3
                 Specimen(
-                    traits = mutableMapOf(
-                        Pair(Trait.SUPER_ENCHI, 1f),
-                        Pair(Trait.HET_PIED, .5f)
+                    morphMap = mutableMapOf(
+                        LociPair(Mutation.ENCHI, Mutation.ENCHI) to 1f,
+                        LociPair(null, Mutation.HET_PIED) to .5f
                     )
                 ) to 1,
                 // 4
                 Specimen(
-                    traits = mutableMapOf(
-                        Pair(Trait.ENCHI, 1f),
-                        Pair(Trait.HET_PIED, .5f)
+                    morphMap = mutableMapOf(
+                        LociPair(Mutation.ENCHI) to 1f,
+                        LociPair(null, Mutation.HET_PIED) to .5f
                     )
                 ) to 2,
                 // 5
                 Specimen(
-                    traits = mutableMapOf(
-                        Pair(Trait.PASTEL, 1f),
-                        Pair(Trait.HET_PIED, .5f)
+                    morphMap = mutableMapOf(
+                        LociPair(Mutation.PASTEL) to 1f,
+                        LociPair(null, Mutation.HET_PIED) to .5f
                     )
                 ) to 1,
                 // 6
                 Specimen(
-                    traits = mutableMapOf(
-                        Trait.NORMAL to 1f,
-                        Trait.HET_PIED to .5f
+                    morphMap = mutableMapOf(
+                        LociPair() to 1f,
+                        LociPair(null, Mutation.HET_PIED) to .5f
                     )
                 ) to 1,
             )
@@ -82,15 +82,15 @@ class PairingTests {
     fun pairing2() {
 
         val male = Specimen(
-            traits = mutableMapOf(
-                Pair(Trait.PASTEL, 1f),
-                Pair(Trait.HET_CRYPTIC, 1f),
+            morphMap = mutableMapOf(
+                LociPair(Mutation.PASTEL) to 1f,
+                LociPair(null, Mutation.HET_CRYPTIC) to 1f
             )
         )
         val female = Specimen(
-            traits = mutableMapOf(
-                Pair(Trait.SUPER_ENCHI, 1f),
-                Pair(Trait.HET_CLOWN, 1f),
+            morphMap = mutableMapOf(
+                LociPair(Mutation.ENCHI, Mutation.ENCHI) to 1f,
+                LociPair(null, Mutation.HET_CLOWN) to 1f
             )
         )
 
@@ -99,37 +99,37 @@ class PairingTests {
             male = male,
             female = female,
             offspringMap = sortedMapOf(
-                compareBy { it.geneCount },
+                compareBy { it.mutationsCount },
                 // 1
                 Specimen(
-                    traits = mutableMapOf(
-                        Pair(Trait.PASTEL, 1f),
-                        Pair(Trait.ENCHI, 1f),
-                        Pair(Trait.HET_CLOWN, .33333334f),
-                        Pair(Trait.HET_CRYPTIC, .33333334f)
+                    morphMap = mutableMapOf(
+                        LociPair(Mutation.PASTEL) to 1f,
+                        LociPair(Mutation.ENCHI) to 1f,
+                        LociPair(null, Mutation.HET_CLOWN) to .33333334f,
+                        LociPair(null, Mutation.HET_CRYPTIC) to .33333334f
                     )
                 ) to 3,
                 // 2
                 Specimen(
-                    traits = mutableMapOf(
-                        Pair(Trait.PASTEL, 1f),
-                        Pair(Trait.ENCHI, 1f),
-                        Pair(Trait.CRYPTON, 1f)
+                    morphMap = mutableMapOf(
+                        LociPair(Mutation.PASTEL) to 1f,
+                        LociPair(Mutation.ENCHI) to 1f,
+                        LociPair(Mutation.HET_CRYPTIC, Mutation.HET_CLOWN) to 1f
                     )
                 ) to 1,
                 // 3
                 Specimen(
-                    traits = mutableMapOf(
-                        Pair(Trait.ENCHI, 1f),
-                        Pair(Trait.CRYPTON, 1f)
+                    morphMap = mutableMapOf(
+                        LociPair(Mutation.ENCHI) to 1f,
+                        LociPair(Mutation.HET_CLOWN, Mutation.HET_CRYPTIC) to 1f
                     )
                 ) to 1,
                 // 4
                 Specimen(
-                    traits = mutableMapOf(
-                        Pair(Trait.ENCHI, 1f),
-                        Pair(Trait.HET_CLOWN, .33333334f),
-                        Pair(Trait.HET_CRYPTIC, .33333334f)
+                    morphMap = mutableMapOf(
+                        LociPair(Mutation.ENCHI) to 1f,
+                        LociPair(null, Mutation.HET_CLOWN) to .33333334f,
+                        LociPair(null, Mutation.HET_CRYPTIC) to .33333334f
                     )
                 ) to 3,
             )
@@ -142,14 +142,14 @@ class PairingTests {
     fun pairing3() {
 
         val male = Specimen(
-            traits = mutableMapOf(
-                Pair(Trait.PASTEL, 1f),
+            morphMap = mutableMapOf(
+                LociPair(Mutation.PASTEL) to 1f
             )
         )
         val female = Specimen(
-            traits = mutableMapOf(
-                Pair(Trait.ENCHI, 1f),
-                Pair(Trait.CRYPTON, 1f),
+            morphMap = mutableMapOf(
+                LociPair(Mutation.ENCHI) to 1f,
+                LociPair(Mutation.HET_CLOWN, Mutation.HET_CRYPTIC) to 1f
             )
         )
 
@@ -158,38 +158,38 @@ class PairingTests {
             male = male,
             female = female,
             offspringMap = sortedMapOf(
-                compareBy({ it.geneCount }, { it.formattedString }),
+                compareBy({ it.mutationsCount }, { it.formattedString }),
                 // 1
                 Specimen(
-                    traits = mutableMapOf(
-                        Trait.PASTEL to 1f,
-                        Trait.ENCHI to 1f,
-                        Trait.HET_CLOWN to .5f,
-                        Trait.HET_CRYPTIC to .5f
+                    morphMap = mutableMapOf(
+                        LociPair(Mutation.PASTEL) to 1f,
+                        LociPair(Mutation.ENCHI) to 1f,
+                        LociPair(null, Mutation.HET_CLOWN) to .5f,
+                        LociPair(null, Mutation.HET_CRYPTIC) to .5f
                     )
                 ) to 1,
                 // 2
                 Specimen(
-                    traits = mutableMapOf(
-                        Trait.ENCHI to 1f,
-                        Trait.HET_CLOWN to .5f,
-                        Trait.HET_CRYPTIC to .5f
+                    morphMap = mutableMapOf(
+                        LociPair(Mutation.ENCHI) to 1f,
+                        LociPair(null, Mutation.HET_CLOWN) to .5f,
+                        LociPair(null, Mutation.HET_CRYPTIC) to .5f
                     )
                 ) to 1,
                 // 3
                 Specimen(
-                    traits = mutableMapOf(
-                        Trait.PASTEL to 1f,
-                        Trait.HET_CLOWN to .5f,
-                        Trait.HET_CRYPTIC to .5f
+                    morphMap = mutableMapOf(
+                        LociPair(Mutation.PASTEL) to 1f,
+                        LociPair(null, Mutation.HET_CLOWN) to .5f,
+                        LociPair(null, Mutation.HET_CRYPTIC) to .5f
                     )
                 ) to 1,
                 // 4
                 Specimen(
-                    traits = mutableMapOf(
-                        Trait.NORMAL to 1f,
-                        Trait.HET_CLOWN to .5f,
-                        Trait.HET_CRYPTIC to .5f
+                    morphMap = mutableMapOf(
+                        LociPair() to 1f,
+                        LociPair(null, Mutation.HET_CLOWN) to .5f,
+                        LociPair(null, Mutation.HET_CRYPTIC) to .5f
                     )
                 ) to 1
             )
@@ -202,82 +202,80 @@ class PairingTests {
     fun equalsAndHashCode() {
         val pairing1 = Pairing.fromParents(
             parent1 = Specimen(
-                traits = mutableMapOf(
-                    Trait.ENCHI to 1f,
-                    Trait.PASTEL to 1f
+                morphMap = mutableMapOf(
+                    LociPair(Mutation.ENCHI) to 1f,
+                    LociPair(Mutation.PASTEL) to 1f
                 )
             ),
             parent2 = Specimen(
-                traits = mutableMapOf(
-                    Trait.SUPER_PASTEL to 1f,
-                    Trait.HET_GHOST to 1f
+                morphMap = mutableMapOf(
+                    LociPair(Mutation.PASTEL, Mutation.PASTEL) to 1f,
+                    LociPair(null, Mutation.HET_GHOST) to 1f
                 )
             )
         )
         val pairing2 = Pairing(
             male = Specimen(
-                traits = mutableMapOf(
-                    Trait.PASTEL to 1f,
-                    Trait.ENCHI to 1f,
+                morphMap = mutableMapOf(
+                    LociPair(Mutation.PASTEL) to 1f,
+                    LociPair(Mutation.ENCHI) to 1f
                 )
             ),
             female = Specimen(
-                traits = mutableMapOf(
-                    Trait.SUPER_PASTEL to 1f,
-                    Trait.HET_GHOST to 1f
+                morphMap = mutableMapOf(
+                    LociPair(Mutation.PASTEL, Mutation.PASTEL) to 1f,
+                    LociPair(null, Mutation.HET_GHOST) to 1f
                 )
             ),
             offspringMap = sortedMapOf(
                 compareBy(
-                    { it.geneCount },
+                    { it.mutationsCount },
                     { it.formattedString }
                 ),
                 // 1
-                Pair(
-                    Specimen(
-                        traits = mutableMapOf(
-                            Trait.SUPER_PASTEL to 1f,
-                            Trait.ENCHI to 1f,
-                            Trait.HET_GHOST to .5f
-                        )
-                    ), 1
-                ),
+                Specimen(
+                    morphMap = mutableMapOf(
+                        LociPair(Mutation.PASTEL, Mutation.PASTEL) to 1f,
+                        LociPair(Mutation.ENCHI) to 1f,
+                        LociPair(null, Mutation.HET_GHOST) to .5f
+                    )
+                ) to 1,
                 // 2
-                Pair(
-                    Specimen(
-                        traits = mutableMapOf(
-                            Trait.ENCHI to 1f,
-                            Trait.PASTEL to 1f,
-                            Trait.HET_GHOST to .5f
-                        )
-                    ), 1
-                ),
+                Specimen(
+                    morphMap = mutableMapOf(
+                        LociPair(Mutation.ENCHI) to 1f,
+                        LociPair(Mutation.PASTEL) to 1f,
+                        LociPair(null, Mutation.HET_GHOST) to .5f
+                    )
+                ) to 1,
                 // 3
-                Pair(
-                    Specimen(
-                        traits = mutableMapOf(Trait.HET_GHOST to .5f, Trait.PASTEL to 1f)
-                    ), 1
-                ),
+                Specimen(
+                    morphMap = mutableMapOf(
+                        LociPair(null, Mutation.HET_GHOST) to .5f,
+                        LociPair(Mutation.PASTEL) to 1f
+                    )
+                ) to 1,
                 // 4
-                Pair(
-                    Specimen(
-                        traits = mutableMapOf(Trait.SUPER_PASTEL to 1f, Trait.HET_GHOST to .5f)
-                    ), 1
-                ),
+                Specimen(
+                    morphMap = mutableMapOf(
+                        LociPair(Mutation.PASTEL, Mutation.PASTEL) to 1f,
+                        LociPair(null, Mutation.HET_GHOST) to .5f
+                    )
+                ) to 1,
             )
         )
 
         val pairing3 = Pairing.fromParents(
             parent1 = Specimen(
-                traits = mutableMapOf(
-                    Trait.PASTEL to 1f,
-                    Trait.ENCHI to 1f
+                morphMap = mutableMapOf(
+                    LociPair(Mutation.PASTEL) to 1f,
+                    LociPair(Mutation.ENCHI) to 1f
                 )
             ),
             parent2 = Specimen(
-                traits = mutableMapOf(
-                    Trait.SUPER_PASTEL to 1f,
-                    Trait.GHOST to 1f
+                morphMap = mutableMapOf(
+                    LociPair(Mutation.PASTEL, Mutation.PASTEL) to 1f,
+                    LociPair(Mutation.HET_GHOST, Mutation.HET_GHOST) to 1f
                 )
             )
         )
