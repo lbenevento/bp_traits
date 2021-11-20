@@ -1481,6 +1481,43 @@ fun Morph.getMutationCount(): Int {
     return mutationCount
 }
 
+
+fun Morph.isHetRecessive() : Boolean {
+    if (morphType == MorphType.RECESSIVE) {
+        if (mutations.first().locus1 == null && mutations.first().locus2 != null) {
+            return true
+        }
+    }
+    return false
+}
+
+fun Morph.isHomoRecessive() : Boolean {
+    if (morphType == MorphType.RECESSIVE) {
+        if (mutations.first().locus1 != null && mutations.first().locus2 != null) {
+            return true
+        }
+    }
+    return false
+}
+
+fun Morph.isHomoCodominant() : Boolean {
+    if (morphType == MorphType.COALLELIC) {
+        if (mutations.first().locus1 != null && mutations.first().locus2 != null) {
+            return true
+        }
+    }
+    return false
+}
+
+fun Morph.isHetCodominant() : Boolean {
+    if (morphType == MorphType.CODOMINANT) {
+        if (mutations.first().locus1 != null && mutations.first().locus2 == null) {
+            return true
+        }
+    }
+    return false
+}
+
 enum class MorphType {
     DOMINANT,
     CODOMINANT,
