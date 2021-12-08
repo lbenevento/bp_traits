@@ -1418,8 +1418,12 @@ enum class Morph(
         fun fromValue(
             vararg loci: LociPair
         ): Morph? {
+            val lociSet = loci.toSet()
+            if (lociSet.isEmpty() || (lociSet.size == 1 && lociSet.first() == LociPair())) {
+                return NORMAL
+            }
             values().find { morph ->
-                morph.mutations == loci.toSet()
+                morph.mutations == lociSet
             }?.let { return it }
             return null
         }

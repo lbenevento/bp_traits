@@ -1,24 +1,18 @@
 package com.scitalys.bp_traits
 
 data class Specimen(
-    private val morphMap: MutableMap<LociPair, Float>
+    val loci: Map<LociPair, Float>
 ) {
 
-    val morph: MutableMap<LociPair, Float> = mutableMapOf()
     val formattedString: String
 
     // If the specimen was initialized with an empty map add the NORMAL trait
     // since that's what a specimen with no mutations is.
     init {
-        if (morphMap.isEmpty()) {
-            morph[LociPair()] = 1f
-        } else {
-            morph += morphMap
-        }
 
         // Calculate formattedString
         var tmpFormattedString = ""
-        morph.toList().forEachIndexed { index, (morph, probability) ->
+        loci.toList().forEachIndexed { index, (morph, probability) ->
             if (index != 0) {
                 tmpFormattedString += " "
             }
@@ -33,17 +27,30 @@ data class Specimen(
     }
 
     override fun equals(other: Any?): Boolean {
+
         if (other !is Specimen) return false
-        val thisSortedMap =
-            morph.toSortedMap(compareBy<LociPair> { it.locus1?.ordinal }.thenBy { it.locus2?.ordinal })
-        val otherSortedMap =
-            other.morph.toSortedMap(compareBy<LociPair> { it.locus1?.ordinal }.thenBy { it.locus2?.ordinal })
+
+        if (other.loci.isEmpty()) {
+            if (this.loci.isEmpty()) return true
+            if (this.loci == mutableMapOf(LociPair() to 1f)) return true
+        }
+        if (this.loci.isEmpty()) {
+            if (other.loci.isEmpty()) return true
+            if (other.loci == mutableMapOf(LociPair() to 1f)) return true
+        }
+
+        val thisSortedMap = this.loci.toSortedMap(
+            compareBy<LociPair> { it.locus1?.ordinal }.thenBy { it.locus2?.ordinal }
+        )
+        val otherSortedMap = other.loci.toSortedMap(
+            compareBy<LociPair> { it.locus1?.ordinal }.thenBy { it.locus2?.ordinal }
+        )
         if (thisSortedMap == otherSortedMap) return true
         return false
     }
 
     override fun hashCode(): Int {
-        return morph.hashCode()
+        return loci.hashCode()
     }
 }
 
@@ -54,7 +61,7 @@ data class Specimen(
 inline val Specimen.mutationsCount: Float
     get() {
         var count = 0f
-        morph.forEach {
+        loci.forEach {
             if (it.key.locus1 != null && it.key.locus2 != null) {
                 count += 2
             } else if (it.key.locus1 != null) {
@@ -70,7 +77,7 @@ inline val Specimen.mutationsCount: Float
  * Function to know if a specimen can be het for a specified mutation.
  */
 fun Specimen.canBeHetFor(mutation: Mutation?): Boolean {
-    morph.forEach { (lociPair, incidence) ->
+    loci.forEach { (lociPair, incidence) ->
         if (lociPair.locus1 != null && lociPair.locus2 != null) {
             if (
                 Trait.fromValue(

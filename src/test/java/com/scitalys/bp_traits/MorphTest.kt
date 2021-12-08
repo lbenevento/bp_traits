@@ -6,14 +6,18 @@ import org.junit.Test
 class MorphTest {
 
     @Test
-    fun fromValueTest() {
-        val normal = Morph.fromValue()
+    fun fromValue() {
+        val normal1 = Morph.fromValue()
+        val normal2 = Morph.fromValue(LociPair())
+        val normal3 = Morph.fromValue(LociPair(null, null))
         val pastel = Morph.fromValue(LociPair(Mutation.PASTEL, null))
         val superPastel = Morph.fromValue(LociPair(Mutation.PASTEL, Mutation.PASTEL))
         val hetGhost = Morph.fromValue(LociPair(null, Mutation.HET_GHOST))
         val crypton1 = Morph.fromValue(LociPair(Mutation.HET_CLOWN, Mutation.HET_CRYPTIC))
         val crypton2 = Morph.fromValue(LociPair(Mutation.HET_CRYPTIC, Mutation.HET_CLOWN))
-        assertEquals(Morph.NORMAL, normal)
+        assertEquals(Morph.NORMAL, normal1)
+        assertEquals(Morph.NORMAL, normal2)
+        assertEquals(Morph.NORMAL, normal3)
         assertEquals(Morph.PASTEL, pastel)
         assertEquals(Morph.SUPER_PASTEL, superPastel)
         assertEquals(Morph.HET_GHOST, hetGhost)
@@ -72,5 +76,11 @@ class MorphTest {
         assertEquals(2, Morph.SUPER_PASTEL.getMutationCount())
         assertEquals(2, Morph.PIED.getMutationCount())
         assertEquals(1, Morph.HET_PIED.getMutationCount())
+    }
+
+    @Test
+    fun valuesFind() {
+        val normal = Morph.values().find { it.mutations == setOf<LociPair>() }
+        assertEquals(Morph.NORMAL, normal)
     }
 }

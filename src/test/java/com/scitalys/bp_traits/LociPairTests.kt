@@ -9,30 +9,30 @@ class LociPairTests {
     @Test
     fun equalsTest() {
         val loci1a = LociPair(
-            locus1 = Mutation.HET_ULTRAMEL,
-            locus2 = null
+            l1 = Mutation.HET_ULTRAMEL,
+            l2 = null
         )
         val loci1b = LociPair(
-            locus1 = null,
-            locus2 = Mutation.HET_ULTRAMEL
+            l1 = null,
+            l2 = Mutation.HET_ULTRAMEL
         )
-        assertEquals(loci1a, loci1b)
+        assertNotEquals(loci1a, loci1b)
         val loci2a = LociPair(
-            locus1 = Mutation.YELLOW_BELLY,
-            locus2 = Mutation.ASPHALT
+            l1 = Mutation.YELLOW_BELLY,
+            l2 = Mutation.ASPHALT
         )
         val loci2b = LociPair(
-            locus1 = Mutation.ASPHALT,
-            locus2 = Mutation.YELLOW_BELLY
+            l1 = Mutation.ASPHALT,
+            l2 = Mutation.YELLOW_BELLY
         )
         assertEquals(loci2a, loci2b)
         val loci3a = LociPair(
-            locus1 = Mutation.HET_CLOWN,
-            locus2 = Mutation.HET_CLOWN
+            l1 = Mutation.HET_CLOWN,
+            l2 = Mutation.HET_CLOWN
         )
         val loci3b = LociPair(
-            locus1 = Mutation.HET_CLOWN,
-            locus2 = Mutation.HET_CLOWN
+            l1 = Mutation.HET_CLOWN,
+            l2 = Mutation.HET_CLOWN
         )
         assertEquals(loci3a, loci3b)
         assertNotEquals(loci1a, loci2a)
@@ -48,8 +48,8 @@ class LociPairTests {
         val lociSet3 = setOf(
             loci3a, loci2a, setOf(
                 LociPair(
-                    locus1 = Mutation.HET_GHOST,
-                    locus2 = Mutation.SPIDER
+                    l1 = Mutation.HET_GHOST,
+                    l2 = Mutation.SPIDER
                 )
             )
         )

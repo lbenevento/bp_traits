@@ -1,5 +1,6 @@
 package com.scitalys.bp_traits
 
+import com.scitalys.bp_traits.Pairing.Companion.joinHets
 import com.scitalys.bp_traits.utils.gcd
 import java.util.*
 
@@ -19,25 +20,23 @@ data class Pairing(
         if (other !is Pairing) {
             return false
         }
-        var areOffspringMapsEquals = false
 
-        val thisOffspringMapAsList = offspringMap.toList()
-        val otherOffspringMapAsList = other.offspringMap.toList()
+        val thisOffspringMapAsList = this.offspringMap.toList().sortedBy { it.first.mutationsCount }
+        val otherOffspringMapAsList = other.offspringMap.toList().sortedBy { it.first.mutationsCount }
 
         // If the sizes are different there is no reason to keep going with further checks.
         if (thisOffspringMapAsList.size != otherOffspringMapAsList.size) return false
 
-        thisOffspringMapAsList.forEachIndexed { index, pair ->
-            val otherPair = otherOffspringMapAsList[index]
-            areOffspringMapsEquals =
-                otherPair.first == pair.first &&
-                otherPair.second == pair.second
+        thisOffspringMapAsList.forEachIndexed { index, (specimen, odds) ->
+            val (otherSpecimen, otherOdds) = otherOffspringMapAsList[index]
+            if (otherSpecimen != specimen || otherOdds != odds) {
+                return false
+            }
         }
         if (
             totalPossibilities == other.totalPossibilities &&
             male == other.male &&
-            female == other.female &&
-            areOffspringMapsEquals
+            female == other.female
         ) return true
         return false
     }
@@ -57,7 +56,7 @@ data class Pairing(
 
         fun fromParents(parent1: Specimen, parent2: Specimen): Pairing {
             val rawResult =
-                PunnettSquare.calculate(parent1.morph.keys, parent2.morph.keys)
+                PunnettSquare.calculate(parent1.loci.keys, parent2.loci.keys)
             val offspringMap = refine(rawResult.map { it.toLociPairSet() })
 
             return Pairing(parent1, parent2, offspringMap)
@@ -65,33 +64,18 @@ data class Pairing(
 
 
         /**
-         * Calls [separateHets] and then if it has reached the
-         * end of the list calls [insertHets] and [simplifyOdds]
+         * Calls [separateHets], [joinHets] and [simplifyOdds]
          */
         private fun refine(rawResult: List<Set<LociPair>>): SortedMap<Specimen, Int> {
 
 
-            val hets: MutableMap<LociPair, Float> = mutableMapOf()
-            val offspringMap: MutableMap<Specimen, Int> = mutableMapOf()
+            var (offspringMap, hets) = rawResult.separateHets()
+            offspringMap = offspringMap.joinHets(hets = hets)
+            offspringMap = offspringMap.simplifyOdds()
 
-            separateHets(
-                rawResults = rawResult,
-                hets = hets,
-                offspringMap = offspringMap
-            )
-
-            insertHets(
-                hets = hets,
-                offspringMap = offspringMap
-            )
-            simplifyOdds(
-                offspringMap
-            )
             return offspringMap.toSortedMap(
-                compareBy(
-                    { it.mutationsCount },
-                    { it.formattedString }
-                )
+                compareByDescending<Specimen>
+                    { it.mutationsCount }.thenBy { it.formattedString }
             )
 
         }
@@ -103,12 +87,11 @@ data class Pairing(
          * - Insert offspring without hets into offspringMap or increment its count if
          *   it is already present.
          */
-        private fun separateHets(
-            rawResults: List<Set<LociPair>>,
-            hets: MutableMap<LociPair, Float>,
-            offspringMap: MutableMap<Specimen, Int>
-        ) {
-            rawResults.forEach { rawResult ->
+        private fun List<Set<LociPair>>.separateHets():
+                Pair<MutableMap<Specimen, Int>, MutableMap<LociPair, Float>> {
+            val offspringMap = mutableMapOf<Specimen, Int>()
+            val hets = mutableMapOf<LociPair, Float>()
+            this.forEach { rawResult ->
 
                 val mutableRawResult = rawResult.toMutableSet()
 
@@ -129,12 +112,10 @@ data class Pairing(
                 // The new traits set without hets gets now transformed into a map
                 // with every mutation being at 100% since they are all visual mutations
                 // at this point.
-                val traitsMap = mutableMapOf(
-                    *mutableRawResult.map { it to 1f }.toTypedArray()
-                )
+                val loci = mutableRawResult.associateWith { 1f }.toMutableMap()
 
                 // Create a specimen with the new trait set.
-                val specimen = Specimen(morphMap = traitsMap)
+                val specimen = Specimen(loci = loci)
 
                 // If specimen is null it means there was not an identical specimen already
                 // in the list so we create it and assign it an incidence of 1. Otherwise
@@ -144,10 +125,10 @@ data class Pairing(
                     val incidence = offspringMap[specimen]?.plus(1) ?: 1
                     offspringMap[specimen] = incidence
                 } else {
-                    offspringMap[Specimen(traitsMap)] = 1
+                    offspringMap[Specimen(loci)] = 1
                 }
-
             }
+            return offspringMap to hets
         }
 
         /**
@@ -155,10 +136,13 @@ data class Pairing(
          * the het appeared in the List<Set<Trait>> given back by [PunnettSquare.calculate]
          * divided the number of every specimen which COULD be het for it.
          */
-        private fun insertHets(
+        private fun MutableMap<Specimen, Int>.joinHets(
             hets: MutableMap<LociPair, Float>,
-            offspringMap: MutableMap<Specimen, Int>
-        ) {
+        ): MutableMap<Specimen, Int> {
+            // This is needed to create a second map. Using val tmpMutableMap = this won't work
+            // because of a ConcurrentModification exception which will happen on the second forEach.
+            val tmpMutableMap = mutableMapOf<Specimen, Int>()
+            tmpMutableMap.putAll(this)
 
             hets.forEach { (lociPair, count) ->
 
@@ -171,7 +155,7 @@ data class Pairing(
                 // For every specimen in offspringMap check if it can have an
                 // heterozygosis of the specified mutation. If it can totalPosHet
                 // gets incremented by the incidence of that specimen.
-                offspringMap.forEach { (specimen, incidence) ->
+                forEach { (specimen, incidence) ->
                     if (specimen.canBeHetFor(hetMutation)) {
                         totalPosHet += incidence
                     }
@@ -179,36 +163,38 @@ data class Pairing(
 
                 // Adds the het with the correct probability
                 // to ALL specimens (since you cannot visually tell)
-                offspringMap.forEach { (specimen, _) ->
+                val localTmpMutableMap = mutableMapOf<Specimen, Int>()
+                tmpMutableMap.forEach { (specimen, odds) ->
                     if (specimen.canBeHetFor(hetMutation)) {
-                        specimen.morph[lociPair] = count / totalPosHet
+                        localTmpMutableMap[Specimen(specimen.loci + (lociPair to count / totalPosHet))] = odds
+                    } else {
+                        localTmpMutableMap[specimen] = odds
                     }
                 }
+                tmpMutableMap.clear()
+                tmpMutableMap.putAll(localTmpMutableMap)
 
             }
+            return tmpMutableMap
         }
 
         /**
          * Calculate greatest common divisor and simplify every odd.
          */
-        private fun simplifyOdds(
-            offspringMap: MutableMap<Specimen, Int>
-        ) {
-            val gcd = offspringMap.values.toList().gcd
+        private fun MutableMap<Specimen, Int>.simplifyOdds(): MutableMap<Specimen, Int> {
+            val tmpMutableMap = this
+
+            val gcd = values.toList().gcd
+
             // A temporary map is created to avoid concurrentModifications
             val tmpOffspringMap: MutableMap<Specimen, Int> = mutableMapOf()
-            offspringMap.forEach { (key, incidence) ->
+            forEach { (key, incidence) ->
                 tmpOffspringMap[key] = incidence / gcd
             }
-            // Clear the old list and put the new pairings in.
-            offspringMap.clear()
-            offspringMap.putAll(tmpOffspringMap)
 
-            for (offspring in offspringMap.keys) {
-                if (offspring.morph.isEmpty()) {
-                    offspring.morph[LociPair()] = 1f
-                }
-            }
+            // Clear the old list and put the new pairings in.
+            tmpMutableMap.putAll(tmpOffspringMap)
+            return tmpMutableMap
         }
 
     }
